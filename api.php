@@ -3,6 +3,7 @@
 // ==========================
 // FORCE CORS FIRST
 // ==========================
+header("Access-Control-Allow-Origin: https://vani.codrant.com");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -510,6 +511,41 @@ if ($action === "create_customer") {
     exit;
 }
 
+// ======================================
+// GET PRELOADED FAQS
+// ======================================
+if ($action === "get_preloaded_faqs") {
+
+    $category = $_GET['category'] ?? '';
+
+    if (!$category) {
+
+        echo json_encode([
+            "success" => false,
+            "message" => "Missing category"
+        ]);
+
+        exit;
+    }
+
+    // ==========================
+    // FETCH FROM SUPABASE
+    // ==========================
+    $res = supabase(
+        "GET",
+        "pre_loaded_question?select=question,answer"
+        . "&category=eq." . urlencode(trim($category))
+        . "&order=id.asc"
+    );
+
+    echo json_encode([
+        "success" => true,
+        "faqs" => $res['data'] ?? [],
+        "debug" => $res
+    ]);
+
+    exit;
+}
 
 // ==========================
 // DEFAULT
@@ -525,6 +561,7 @@ echo json_encode([
         "get_top_faqs",
         "search_faqs",
         "track_faq_usage",
-        "create_customer"
+        "create_customer",
+        "get_preloaded_faqs"
     ]
 ]);
